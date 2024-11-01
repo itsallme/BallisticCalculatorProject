@@ -1,9 +1,18 @@
+/*
+ * Ballistic Penetration Calculator Versus Mediums Program
+ * This program is designed to implement the Krupp formula to simulate fired rounds
+ * against differing mediums at differing distances.
+ *
+ * By: Tristan Stocks
+*/
 
 
 #include <iostream>
 #include <cmath>
+#include <iomanip>
 #include <set>
 #include <unordered_set>
+#include <list>
 
 
 
@@ -20,6 +29,7 @@ using std::set;
 // Projectile which we are firing
 class Projectile {
 private:
+	string projectileName;
 	float diameter_caliber_{};
 	float mass{};
 	float velocity{};
@@ -30,15 +40,19 @@ private:
 public:
 	Projectile() {}
 
-	Projectile(float caliber, float mass, float velocity, float coefficientOfDrag) {
+	Projectile(string name, float diameterCaliber, float mass, float velocity, float coefficientOfDrag) {
 
-		this->diameter_caliber_ = caliber;
+		this->projectileName = name;
+		this->diameter_caliber_ = diameterCaliber;
 		this->mass = mass;
 		this->velocity = velocity;
 		this->coefficientOfDrag = coefficientOfDrag;
 
 	}
 
+	string getProjectileName() const { return projectileName; }
+
+	void setProjectileName(string name) { this->projectileName = name; }
 
 	float getCaliber() const { return diameter_caliber_; }
 
@@ -61,6 +75,7 @@ public:
 // Material for the Plate we are firing a projectile at
 class Material {
 private:
+	// density is also another term for strength
 	float density{};
 	float depth{};
 
@@ -105,13 +120,24 @@ public:
 
 
 	// Krupp's formula
+	// e = [(MV^2cos(theta))    /    (Kd^(5/3)]^(3/4) when solved for e    
+	//  e = thickness of plate, M = mass, V = Velocity,  K = Density,  d = diameter/caliber
 	float calculate()
 	{
-		float calculation = 0.00f;
+		
 
+		// MV^2cos(theta)
+		float numerator = x_projectile_.getMass() * pow(x_projectile_.getVelocity(), 2.0f) * cos(30.00f);
 
+		//2Kd^(5/3)
+		// 5/3 ~ 1.666666667
+		float denominator = 2 * y_material_.getDensity() * pow(x_projectile_.getCaliber(), (1.666666667f));
 
-		calculation = x_projectile_.getVelocity() + y_material_.getDepth();
+		//quotient ^ (3/4)
+		float quotioent = numerator / denominator;
+
+		// 3/4 ~ .75
+		float calculation = pow(quotioent, 0.75f);
 
 		return calculation;
 	}
@@ -131,23 +157,27 @@ int main() {
 		<< "This program is designed to implement the Krupp formula to simulate fired rounds"
 		<< "against differing mediums at differing distances. \n\n";
 
-	Projectile cartridge556(556.00f, 5.0f, 1000.0f, 0.8f);
-	Projectile shellAPM72(75.00f, 10.0f, 600.0f, 0.9f);
-	Material steel(10.0f, 10.0f);
+	Projectile cartridge556("5.56 m855A1", 5.56f, 0.004f, 961.0f, 0.151f);
+	Projectile shellAPM72("75mm",75.00f, 9.03556f, 588.26f, 0.9f);
+	Material steel(0.66f, 10.0f);
 
 
 
 
 
 	// projectile property print,  test,  remove later
-	cout << "Projectile Caliber " << cartridge556.getCaliber() << "mm \n"
+	cout << "Projectile Diameter " << cartridge556.getCaliber() << "mm \n"
 		<< "Velocity " << cartridge556.getVelocity() << "ms \n"
 		<< "Mass " << cartridge556.getMass() << "kg \n"
 		<< "Coefficient of drag " << cartridge556.getCOD() << " \n"
 		<< "Material depth " << steel.getDepth() << "\n"
-		<< "Calculation test " << BallisticCalculator(cartridge556, steel).calculate();
-
+		<< "Calculation test " << BallisticCalculator(cartridge556, steel).calculate() << "\n\n\n"
+		<< "Calculation test for " << shellAPM72.getProjectileName() << " " << BallisticCalculator(shellAPM72, steel).calculate();
+	/// 1.451950539
+	///
+	
 }
+
 
 
 
