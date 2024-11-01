@@ -172,7 +172,7 @@ int main() {
 		<< "Coefficient of drag " << cartridge556.getCOD() << " \n"
 		<< "Material depth " << steel.getDepth() << "\n"
 		<< "Calculation test " << BallisticCalculator(cartridge556, steel).calculate() << "\n\n\n"
-		<< "Calculation test for " << shellAPM72.getProjectileName() << " " << BallisticCalculator(shellAPM72, steel).calculate();
+		<< "Calculation test for " << shellAPM72.getProjectileName() << " " << BallisticCalculator(shellAPM72, steel).calculate() << "\n\n\n";
 	/// 1.451950539
 	///
 	
