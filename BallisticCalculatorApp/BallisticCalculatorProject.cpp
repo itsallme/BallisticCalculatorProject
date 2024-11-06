@@ -77,23 +77,26 @@ public:
 class Material {
 private:
 	// density is also another term for strength
+	string matName;
 	float density{};
 	float depth{};
+	
 
 public:
 	Material() {}
 
-	Material(float density, float depth)
+	Material(string matName, float density, float depth)
 	{
 		this->density = density;
 		this->depth = depth;
-
+		this->matName = matName;
 	}
+
+	string getMatName() { return matName; }
 
 	float getDensity() const { return density; }
 
 	void setDensity(float density) { this->density = density; }
-
 
 	float getDepth() const { return depth; }
 
@@ -164,12 +167,6 @@ public:
 		return penResult;
 	}	
 
-
-
-
-
-
-
 };
 
 class Result {
@@ -178,11 +175,39 @@ private:
 	float penetrationDepth;
 	string penned;
 
+
 public:
-	Result(BallisticCalculator calculations) {
+	string projectileName;
+	string materialName;
+	float diameter_caliber_{};
+	float mass{};
+	float velocity{};
+	float coefficientOfDrag{};
+	float density{};
+	float depth{};
 
-		setPenetrationDepth(calculations.calculatePenetrationDepth());
 
+
+	Result(Projectile xProjectile, Material yMaterial) {
+		
+		// Ballistic Calculation records
+		BallisticCalculator BC = BallisticCalculator(xProjectile, yMaterial);
+
+		penetrationDepth = BC.calculatePenetrationDepth();
+		penned = BC.didItPen();
+
+		// Projectile Records
+		projectileName = xProjectile.getProjectileName();
+		diameter_caliber_ = xProjectile.getCaliber();
+		mass = xProjectile.getMass();
+		velocity = xProjectile.getVelocity();
+		coefficientOfDrag = xProjectile.getCOD();
+
+		// Material Records
+		materialName = yMaterial.getMatName();
+		density = yMaterial.getDensity();
+		depth = yMaterial.getDepth();
+		
 	}
 
 	float getPenetrationDepth() { return penetrationDepth; };
@@ -191,59 +216,79 @@ public:
 		penetrationDepth = penDepth;
 	}
 
-	
+	string getPenned() { return penned;  }
+
+	void setPenned(string penned) { this->penned = penned; }	
 
 
 };
 
 class ResultLibrary {
 
-private:
-	std::vector<Result> LibraryEntries;
-
 public:
-	
+	std::vector<Result> LibraryEntries;
+	std::vector<Result>::iterator itr;
 	ResultLibrary(Result entry){
-		LibraryEntries.push_back(entry);
+		addResult(entry);
+
 
 	}
 
+	void addResult(Result entry) {
+		LibraryEntries.push_back(entry);
+	}
+
+	void showResults() {
+		
+		for (itr = LibraryEntries.begin(); itr != LibraryEntries.end(); itr++) {
+
+
+
+			cout << "Projectile Stats: \n"
+				<< LibraryEntries.data()->projectileName << "\n"
+				<< "Caliber " << LibraryEntries.data()->diameter_caliber_ << " mm\n"
+				<< "Velocity " << LibraryEntries.data()->velocity << " ms\n"
+				<< "Coefficient of Drag " << LibraryEntries.data()->coefficientOfDrag << " Cd\n\n"
+				<< "Material Stats: \n"
+				<< LibraryEntries.data()->materialName << "\n"
+				<< "Thickness " << LibraryEntries.data()->depth << " mm\n"
+				<< "Strength \"Special Treatment Steel\" (STS) Rating " << LibraryEntries.data()->density << " Q\n\n"
+				<< "Penetration Data:\n"
+				<< LibraryEntries.data()->getPenned() << " \n"
+				<< "With a penetration depth of "
+				<< LibraryEntries.data()->getPenetrationDepth() << " mm\n\n\n";
+
+		}
+	}
 	
-
-
 };
 
 
 int main() {
 	// Program Intro
 	cout << "Ballistic Penetration Calculator Versus Mediums Program\n"
-		<< "This program is designed to implement the Krupp formula to simulate fired rounds"
+		<< "This program is designed to implement the Krupp formula to simulate fired rounds "
 		<< "against differing mediums at differing distances. \n\n";
+
 
 	Projectile cartridge556("5.56 m855A1", 5.56f, 0.004f, 961.00f, 0.151f);
 	Projectile shellAPM72("75mm",75.00f, 9.03556f, 588.26f, 0.90f);
-	Material steel(0.66f, 10.00f);
-
-
-	ResultLibrary testResults();
-
-	BallisticCalculator test1 = BallisticCalculator(cartridge556, steel);
-
+		
+	// Materials gathered from 
+	// http://www.navweaps.com/index_nathan/metalprpsept2009.php 
+	Material steel("Average Construction Steel", 0.80f, 10.00f);
+	Material HTsteel("Light Armor Steel (High Tensile)", 0.85f, 10.00f);
+	Material EHSDsteel("Extra-High-Strength Silicon Magnese", 0.90f, 10.00f);
 	
+	Result Test1Results = Result(cartridge556,steel);
+	Result Test2Results = Result(shellAPM72, steel);
 
-
-
-	// projectile property print,  test,  remove later
-	cout << "Projectile Diameter " << cartridge556.getCaliber() << "mm \n"
-		<< "Velocity " << cartridge556.getVelocity() << "ms \n"
-		<< "Mass " << cartridge556.getMass() << "kg \n"
-		<< "Coefficient of drag " << cartridge556.getCOD() << " \n"
-		<< "Material depth " << steel.getDepth() << "\n"
-		<< "Calculation test " << test1.calculatePenetrationDepth() << "\n\n\n"
-		<< "did it pen?: " << test1.didItPen() << "\n\n\n";
-	/// 
-	///
+	ResultLibrary* Resultlog = new ResultLibrary(Test1Results);
 	
+	Resultlog->addResult(Test2Results);
+
+	Resultlog->showResults();
+
 }
 
 
