@@ -12,7 +12,7 @@
 #include <iomanip>
 #include <set>
 #include <unordered_set>
-#include <list>
+#include <vector>
 
 
 
@@ -100,12 +100,12 @@ public:
 	void setDepth(float depth) { this->depth = depth; }
 };
 
-class BallisticCalculator
-{
+class BallisticCalculator{
 private:
-	float distance{};
+	float theta = 0.00f;
 	Projectile x_projectile_;
 	Material y_material_;
+
 
 public:
 
@@ -114,39 +114,101 @@ public:
 	{
 		x_projectile_ = obj_p_projectile;
 		y_material_ = obj_material;
-		calculate();
-
-
+		
 	}
 
 
 	// Krupp's formula
-	// e = [(MV^2cos(theta))    /    (Kd^(5/3)]^(3/4) when solved for e    
+	// e = [ (MV^2cos(theta)) / (Kd^(5/3) ]^(3/4) when solved for e    
 	//  e = thickness of plate, M = mass, V = Velocity,  K = Density,  d = diameter/caliber
-	float calculate()
+	float calculatePenetrationDepth()
 	{
 		
 
 		// MV^2cos(theta)
-		float numerator = x_projectile_.getMass() * pow(x_projectile_.getVelocity(), 2.0f) * cos(30.00f);
+		float numerator = x_projectile_.getMass() * pow(x_projectile_.getVelocity(), 2.0f) * cos(theta);
 
 		//2Kd^(5/3)
 		// 5/3 ~ 1.666666667
-		float denominator = 2 * y_material_.getDensity() * pow(x_projectile_.getCaliber(), (1.666666667f));
+		float denominator = 2 * y_material_.getDensity() * pow(x_projectile_.getCaliber(), (5.00f / 3.00f));
 
-		//quotient ^ (3/4)
+		//quotient 
 		float quotioent = numerator / denominator;
 
-		// 3/4 ~ .75
-		float calculation = pow(quotioent, 0.75f);
+		// quotient ^ 3/4 ~ .75
+		float penDepthCalc = pow(quotioent, 0.75f);
 
-		return calculation;
+		return penDepthCalc;
 	}
 
-	float getDistance() const { return distance; }
+	// 1/2(MV^2) = K(ed^2/cos(theta))(e/d)^1/3
+	string didItPen(){
+		string penResult = "Penetration unsuccesful";
 
-	void setDistance(float distance) { this->distance = distance; }
+		//1/2(MV^2)
+		float energy = .5 * (x_projectile_.getMass() * pow(x_projectile_.getVelocity(), 2));
 
+		// K(ed^2)/cos(theta)
+		float first = y_material_.getDensity() * ((y_material_.getDepth() * pow(x_projectile_.getCaliber(), 2)) / (cos(theta)));
+				
+		// (e/d)^1/3
+		float second = pow((y_material_.getDepth() / x_projectile_.getCaliber()), 1.00/3.00);
+
+		// K(ed^2/cos(theta))(e/d)^1/3
+		float rightSideEquation = first * second;
+
+		if (energy >= rightSideEquation) {
+			return penResult = "Penetrated succesfully";
+		} 
+
+		return penResult;
+	}	
+
+
+
+
+
+
+
+};
+
+class Result {
+
+private:
+	float penetrationDepth;
+	string penned;
+
+public:
+	Result(BallisticCalculator calculations) {
+
+		setPenetrationDepth(calculations.calculatePenetrationDepth());
+
+	}
+
+	float getPenetrationDepth() { return penetrationDepth; };
+
+	void setPenetrationDepth(float penDepth) {
+		penetrationDepth = penDepth;
+	}
+
+	
+
+
+};
+
+class ResultLibrary {
+
+private:
+	std::vector<Result> LibraryEntries;
+
+public:
+	
+	ResultLibrary(Result entry){
+		LibraryEntries.push_back(entry);
+
+	}
+
+	
 
 
 };
@@ -158,11 +220,16 @@ int main() {
 		<< "This program is designed to implement the Krupp formula to simulate fired rounds"
 		<< "against differing mediums at differing distances. \n\n";
 
-	Projectile cartridge556("5.56 m855A1", 5.56f, 0.004f, 961.0f, 0.151f);
-	Projectile shellAPM72("75mm",75.00f, 9.03556f, 588.26f, 0.9f);
-	Material steel(0.66f, 10.0f);
+	Projectile cartridge556("5.56 m855A1", 5.56f, 0.004f, 961.00f, 0.151f);
+	Projectile shellAPM72("75mm",75.00f, 9.03556f, 588.26f, 0.90f);
+	Material steel(0.66f, 10.00f);
 
 
+	ResultLibrary testResults();
+
+	BallisticCalculator test1 = BallisticCalculator(cartridge556, steel);
+
+	
 
 
 
@@ -172,9 +239,9 @@ int main() {
 		<< "Mass " << cartridge556.getMass() << "kg \n"
 		<< "Coefficient of drag " << cartridge556.getCOD() << " \n"
 		<< "Material depth " << steel.getDepth() << "\n"
-		<< "Calculation test " << BallisticCalculator(cartridge556, steel).calculate() << "\n\n\n"
-		<< "Calculation test for " << shellAPM72.getProjectileName() << " " << BallisticCalculator(shellAPM72, steel).calculate() << "\n\n\n";
-	/// 1.451950539
+		<< "Calculation test " << test1.calculatePenetrationDepth() << "\n\n\n"
+		<< "did it pen?: " << test1.didItPen() << "\n\n\n";
+	/// 
 	///
 	
 }
