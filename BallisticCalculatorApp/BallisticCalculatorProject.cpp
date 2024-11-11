@@ -227,7 +227,7 @@ class ResultLibrary {
 
 public:
 	std::vector<Result> LibraryEntries;
-	std::vector<Result>::iterator itr;
+	
 	ResultLibrary(Result entry){
 		addResult(entry);
 
@@ -238,27 +238,31 @@ public:
 		LibraryEntries.push_back(entry);
 	}
 
+	// show everything
 	void showResults() {
-		
-		for (itr = LibraryEntries.begin(); itr != LibraryEntries.end(); itr++) {
+		int count = 1;
 
-
-
-			cout << "Projectile Stats: \n"
-				<< LibraryEntries.data()->projectileName << "\n"
-				<< "Caliber " << LibraryEntries.data()->diameter_caliber_ << " mm\n"
-				<< "Velocity " << LibraryEntries.data()->velocity << " ms\n"
-				<< "Coefficient of Drag " << LibraryEntries.data()->coefficientOfDrag << " Cd\n\n"
+		// formatting for easy result display, later implement into chart/table.
+		for (auto i : LibraryEntries ) {
+			
+			cout << "Test run: " << count++ << "\n"
+				<< "Projectile Stats: \n"
+				<< i.projectileName << "\n"
+				<< "Caliber " << i.diameter_caliber_ << " mm\n"
+				<< "Velocity " << i.velocity << " ms\n"
+				<< "Coefficient of Drag " << i.coefficientOfDrag << " Cd\n\n"
 				<< "Material Stats: \n"
-				<< LibraryEntries.data()->materialName << "\n"
-				<< "Thickness " << LibraryEntries.data()->depth << " mm\n"
-				<< "Strength \"Special Treatment Steel\" (STS) Rating " << LibraryEntries.data()->density << " Q\n\n"
+				<< i.materialName << "\n"
+				<< "Thickness " << i.depth << " mm\n"
+				<< "Strength \"Special Treatment Steel\" (STS) Rating " << i.density << " Q\n\n"
 				<< "Penetration Data:\n"
-				<< LibraryEntries.data()->getPenned() << " \n"
+				<< i.getPenned() << " \n"
 				<< "With a penetration depth of "
-				<< LibraryEntries.data()->getPenetrationDepth() << " mm\n\n\n";
-
+				<< i.getPenetrationDepth() << " mm\n__________________________________________________________\n\n";
+				
 		}
+
+		cout << "End of program\n\n\n";
 	}
 	
 };
@@ -280,12 +284,22 @@ int main() {
 	Material HTsteel("Light Armor Steel (High Tensile)", 0.85f, 10.00f);
 	Material EHSDsteel("Extra-High-Strength Silicon Magnese", 0.90f, 10.00f);
 	
-	Result Test1Results = Result(cartridge556,steel);
+	Result Test1Results = Result(cartridge556, steel);
+	Result Test1aResults = Result(cartridge556, HTsteel);
+	Result Test1bResults = Result(cartridge556, EHSDsteel);
+
 	Result Test2Results = Result(shellAPM72, steel);
+	Result Test2aResults = Result(shellAPM72, HTsteel);
+	Result Test2bResults = Result(shellAPM72, EHSDsteel);
 
 	ResultLibrary* Resultlog = new ResultLibrary(Test1Results);
 	
+	Resultlog->addResult(Test1aResults);
+	Resultlog->addResult(Test1bResults);
 	Resultlog->addResult(Test2Results);
+	Resultlog->addResult(Test2aResults);
+	Resultlog->addResult(Test2bResults);
+
 
 	Resultlog->showResults();
 
