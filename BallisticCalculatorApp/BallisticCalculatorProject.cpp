@@ -152,9 +152,11 @@ public:
 		// MV^2cos(theta)
 		float numerator = x_projectile_.getMass() * pow(x_projectile_.getVelocity(), 2.0f) * cosf(theta);
 
+
+		// Culprit for incorrect code
 		//2Kd^(5/3)
 		// 5/3 ~ 1.666666667
-		float denominator = 2 * y_material_.getDensity() * pow(x_projectile_.getCaliber(), (5.00f / 3.00f));
+		float denominator =   y_material_.getDensity() * pow(x_projectile_.getCaliber(), (5.00f / 3.00f));
 
 		//quotient 
 		float quotioent = numerator / denominator;
@@ -318,7 +320,7 @@ public:
 		
 		}
 
-		cout << "End of program\n\n\n";
+		cout << "End of test runs.\n\n\n";
 
 		createCSV();
 
@@ -359,6 +361,10 @@ public:
 
 	}
 
+	void clearLog(){
+		LibraryEntries.clear();
+	}
+
 
 	
 };
@@ -369,26 +375,47 @@ int main() {
 	cout << "Ballistic Penetration Calculator Versus Mediums Program\n"
 		<< "This program is designed to implement the Krupp formula to simulate fired rounds "
 		<< "against differing mediums at differing distances. \n\n";
+
+
+
 	// Projectile pulled from here
 	// https://en.wikipedia.org/wiki/5.56%C3%9745mm_NATO
 	Projectile cartridge556("5.56 m855A1", 5.56f, 0.004f, 961.00f, 0.151f);
-
+	
+	
+	//Validation Projectile F1 Ball
+	// Field testing and probabablistic Assessment of ballistic penetration of steel plate
+	Projectile cartridge556F1("5.56 F1 Ball", 5.66f, 0.004f, 920.0f, 0.151f);
+	Material valSteel("Average Construction Steel", 0.80f, 25.00f);
+	Material valHTsteel("Light Armor Steel (High Tensile)", 0.85f, 25.00f);
+	Material valEHSDsteel("Reverse Engineered Steel K for Co Formulas", 8.74195f, 25.00f);
+	Material valKFoundSteel("Reverse Engineered Steel K Material Resistance", 11.2074f, 25.00f);
+	Result validResults = Result(cartridge556F1,valSteel);
+	Result validResults2 = Result(cartridge556F1, valHTsteel);
+	Result validResults3 = Result(cartridge556F1, valEHSDsteel);
+	Result validResults4 = Result(cartridge556F1, valKFoundSteel);
+	ResultLibrary* validationVerificaitonLog = new ResultLibrary(validResults);
+	
 	// 
 	Projectile shellAPM72("75mm", 75.00f, 9.03556f, 588.26f, 0.90f);
 
 	// Materials gathered from 
-	// http://www.navweaps.com/index_nathan/metalprpsept2009.php 
+	// http://www.navweaps.com/index_nathan/metalprpsept2009.php
+
+
 	Material steel("Average Construction Steel", 0.80f, 10.00f);
 	Material HTsteel("Light Armor Steel (High Tensile)", 0.85f, 10.00f);
 	Material EHSDsteel("Extra-High-Strength Silicon Magnese", 0.90f, 10.00f);
 
 	Material testSteel("Average Construction Steel", 0.80f, 39.00f);
+	Material testSteel75Percent("Extra-High-Strength Silicon Magnese", 0.90f, 29.26f);
 
-
+	
 
 	// Test criteria, might put into array and cycle through to make code more efficient
-
-	Result Test1Results = Result(cartridge556, steel);
+	//Result Test1Results = Result(cartridge556, steel);
+	// Scenario analysis baseline
+	Result Test1Results = Result(cartridge556, testSteel75Percent);
 	/*
 	Result Test1aResults = Result(cartridge556, HTsteel);
 	Result Test1bResults = Result(cartridge556, EHSDsteel);
@@ -410,7 +437,6 @@ int main() {
 
 	// random values for 
 	ResultLibrary* RandomResultLog = new ResultLibrary(Test1Results);
-
 
 	// randomizer
 	std::normal_distribution<float> normDist(cartridge556.getVelocity(), 5.00f);
@@ -438,44 +464,113 @@ int main() {
 		
 	}
 
+	char choice = -100;
+
+	// begin user operator menu for console
+	string choices = "Please enter a numerical option below : \n"
+		"1. Run program for random angles on a ballistic plate.\n"
+		"2. Run program for random velocities on a ballistic plate.\n"
+		"3. \n"
+		"0. End Program \n\nEntry: ";
+
+	cout << choices;
+
+	std::cin >> choice; 
+
+	while (choice != '0') {
+
+		switch (choice) {
 
 
-	// radian randomizer for theta and impact angle 
-	for (int y = 0; y < 1000; y++) {
+		case '1':
+			// radian randomizer for theta and impact angle 
+			for (int y = 0; y < 1000; y++) {
 
-		if (randThetaArray[y] < -1.00f) {
-			randThetaArray[y] += 1.00f;
+
+				if (randThetaArray[y] < -1.00f) {
+					randThetaArray[y] += 1.00f;
+				}
+
+				if (randThetaArray[y] > 1.00f) {
+					randThetaArray[y] -= 1.00f;
+				}
+
+				float tempTheta = randThetaArray[y];
+				Test1Results = Result(cartridge556, testSteel75Percent, tempTheta);
+				RandomResultLog->addResult(Test1Results);
+			}
+
+				// show results
+				RandomResultLog->showResults();
+
+				// clear the results
+				RandomResultLog->clearLog();
+
+				cout << choices;
+				std::cin >> choice;
+
+			
+			break;
+
+		case '2':
+			// velocity randomizer
+			for (int i = 0; i < 1000; i++) {
+
+				Projectile randCatridge556 = cartridge556;
+
+				randCatridge556.setVelocity(randVelArray[i]);
+
+				Test1Results = Result(randCatridge556, testSteel);
+
+				RandomResultLog->addResult(Test1Results);
+			}
+
+				RandomResultLog->showResults();
+
+				RandomResultLog->clearLog();
+
+				cout << choices;
+				std::cin >> choice;
+
+			
+			break;
+
+		case '3':
+			// Validation testing
+			// Field testing and probabablistic Assessment of ballistic penetration of steel plate
+			
+			validationVerificaitonLog->addResult(validResults2);
+			validationVerificaitonLog->addResult(validResults3);
+			validationVerificaitonLog->addResult(validResults4);
+
+			validationVerificaitonLog->showResults();
+
+			validationVerificaitonLog->clearLog();
+
+
+			cout << choices;
+			std::cin >> choice;
+			break;
+
+		// break out of program
+		case '0':
+			break;
+
+		default:
+			cout << "\n\nPlease enter one of the entries above:";
+			std::cin >> choice;
+			break;
 		}
 
-		if (randThetaArray[y] > 1.00f) {
-			randThetaArray[y] -= 1.00f;
-		}
+
 		
-		float tempTheta = randThetaArray[y];
-		Test1Results = Result(cartridge556, testSteel, tempTheta);
-		RandomResultLog->addResult(Test1Results);
 
 	}
 	
+	cout << "\nThank you for using the Ballistic Calculator.\n\n\n";
 
-	/*
-	// velocity randomizer 
-	for (int i = 0; i < 1000; i++) {
-		
-		Projectile randCatridge556 = cartridge556;
 
-		randCatridge556.setVelocity(randVelArray[i]);
 
-		Test1Results = Result(randCatridge556, testSteel);
-
-		RandomResultLog->addResult(Test1Results);
-				
-	}
-	
-	RandomResultLog->showResults();
-
-	*/
-	
 
 }
 
