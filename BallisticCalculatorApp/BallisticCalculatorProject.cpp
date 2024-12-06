@@ -4,8 +4,9 @@
  * against differing mediums at differing distances.
  *
  * By: Tristan Stocks
+ * ver 1.0
+ * 12/06/2024
 */
-
 
 #include <iostream>
 #include <cmath>
@@ -16,20 +17,12 @@
 #include <fstream>
 #include <random>
 
-
-
-
 using std::cout;
 using std::endl;
 using std::string;
 using std::get;
 using std::set;
 using std::ios;
-
-
-
-
-
 
 // Projectile which we are firing
 class Projectile {
@@ -41,8 +34,6 @@ private:
 	float velocity{};
 	float coefficientOfDrag{};
 	float immutabletempVelocity{};
-
-
 
 public:
 	Projectile() {}
@@ -200,7 +191,6 @@ private:
 	float penetrationDepth;
 	string penned;
 
-
 public:
 	string projectileName;
 	string materialName;
@@ -211,7 +201,6 @@ public:
 	float density{};
 	float depth{};
 	float theta{};
-
 
 	Result(Projectile xProjectile, Material yMaterial) {
 		
@@ -259,9 +248,7 @@ public:
 		depth = yMaterial.getDepth();
 
 	}
-
 	
-
 	float getPenetrationDepth() { return penetrationDepth; };
 
 	void setPenetrationDepth(float penDepth) {
@@ -272,12 +259,7 @@ public:
 
 	void setPenned(string penned) { this->penned = penned; }	
 
-
 };
-
-
-
-
 
 class ResultLibrary {
 
@@ -286,7 +268,6 @@ public:
 	
 	ResultLibrary(Result entry){
 		addResult(entry);
-
 
 	}
 
@@ -330,12 +311,7 @@ public:
 
 		std::fstream fout;
 		
-
-		
-
-		fout.open("BallisticCalc.csv", ios::out | ios::app);
-			
-						
+		fout.open("BallisticCalc.csv", ios::out | ios::app);				
 
 		for (auto i : LibraryEntries) {
 
@@ -358,17 +334,13 @@ public:
 
 		}
 
-
 	}
 
 	void clearLog(){
 		LibraryEntries.clear();
 	}
-
-
-	
+		
 };
-
 
 int main() {
 	// Program Intro
@@ -376,12 +348,9 @@ int main() {
 		<< "This program is designed to implement the Krupp formula to simulate fired rounds "
 		<< "against differing mediums at differing distances. \n\n";
 
-
-
 	// Projectile pulled from here
 	// https://en.wikipedia.org/wiki/5.56%C3%9745mm_NATO
 	Projectile cartridge556("5.56 m855A1", 5.56f, 0.004f, 961.00f, 0.151f);
-	
 	
 	//Validation Projectile F1 Ball
 	// Field testing and probabablistic Assessment of ballistic penetration of steel plate
@@ -402,38 +371,16 @@ int main() {
 	// Materials gathered from 
 	// http://www.navweaps.com/index_nathan/metalprpsept2009.php
 
-
 	Material steel("Average Construction Steel", 0.80f, 10.00f);
 	Material HTsteel("Light Armor Steel (High Tensile)", 0.85f, 10.00f);
 	Material EHSDsteel("Extra-High-Strength Silicon Magnese", 0.90f, 10.00f);
-
 	Material testSteel("Average Construction Steel", 0.80f, 39.00f);
 	Material testSteel75Percent("Extra-High-Strength Silicon Magnese", 0.90f, 29.26f);
 
-	
-
 	// Test criteria, might put into array and cycle through to make code more efficient
-	//Result Test1Results = Result(cartridge556, steel);
+
 	// Scenario analysis baseline
 	Result Test1Results = Result(cartridge556, testSteel75Percent);
-	/*
-	Result Test1aResults = Result(cartridge556, HTsteel);
-	Result Test1bResults = Result(cartridge556, EHSDsteel);
-
-	Result Test2Results = Result(shellAPM72, steel);
-	Result Test2aResults = Result(shellAPM72, HTsteel);
-	Result Test2bResults = Result(shellAPM72, EHSDsteel);
-
-	ResultLibrary* Resultlog = new ResultLibrary(Test1Results);
-
-	Resultlog->addResult(Test1aResults);
-	Resultlog->addResult(Test1bResults);
-	Resultlog->addResult(Test2Results);
-	Resultlog->addResult(Test2aResults);
-	Resultlog->addResult(Test2bResults);
-	*/
-	// normal result log
-	//Resultlog->showResults();
 
 	// random values for 
 	ResultLibrary* RandomResultLog = new ResultLibrary(Test1Results);
@@ -481,7 +428,6 @@ int main() {
 
 		switch (choice) {
 
-
 		case '1':
 			// radian randomizer for theta and impact angle 
 			for (int y = 0; y < 1000; y++) {
@@ -508,8 +454,7 @@ int main() {
 
 				cout << choices;
 				std::cin >> choice;
-
-			
+							
 			break;
 
 		case '2':
@@ -531,8 +476,7 @@ int main() {
 
 				cout << choices;
 				std::cin >> choice;
-
-			
+							
 			break;
 
 		case '3':
@@ -542,11 +486,8 @@ int main() {
 			validationVerificaitonLog->addResult(validResults2);
 			validationVerificaitonLog->addResult(validResults3);
 			validationVerificaitonLog->addResult(validResults4);
-
 			validationVerificaitonLog->showResults();
-
 			validationVerificaitonLog->clearLog();
-
 
 			cout << choices;
 			std::cin >> choice;
@@ -561,16 +502,10 @@ int main() {
 			std::cin >> choice;
 			break;
 		}
-
-
 		
-
 	}
 	
 	cout << "\nThank you for using the Ballistic Calculator.\n\n\n";
-
-
-
 
 }
 
